@@ -1,1 +1,4 @@
-export class Drawing {}
+export class Drawing {
+  type: string;
+  figure: any;
+}

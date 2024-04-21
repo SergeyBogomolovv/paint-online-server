@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { DrawingService } from './drawing.service';
 import { Server, Socket } from 'socket.io';
+import { Drawing } from './entities/drawing.entity';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class DrawingGateway {
@@ -21,24 +22,31 @@ export class DrawingGateway {
       'connection',
       `Пользователь ${message.name} подключился`,
     );
-    return `Пользователь ${message.name} подключился`;
+    client.emit('connection', `Пользователь ${message.name} подключился`);
   }
-
   @SubscribeMessage('draw')
-  draw(@MessageBody() message: any) {
-    this.server.emit('connection', message);
-    return message;
+  draw(@MessageBody() message: Drawing, @ConnectedSocket() client: Socket) {
+    client.emit(message.type, message.figure);
+    client.broadcast.emit(message.type, message.figure);
   }
-
   @SubscribeMessage('finish')
-  finish(@MessageBody() message: any) {
-    this.server.emit('connection', message);
-    return message;
+  finish(@ConnectedSocket() client: Socket) {
+    client.broadcast.emit('finish');
+    client.emit('finish');
   }
-
-  @SubscribeMessage('action')
-  action(@MessageBody() message: any) {
-    this.server.emit('connection', message);
-    return message;
+  @SubscribeMessage('save')
+  save(@MessageBody('data') data: string, @ConnectedSocket() client: Socket) {
+    client.broadcast.emit('save', data);
+    client.emit('save', data);
+  }
+  @SubscribeMessage('undo')
+  undo(@ConnectedSocket() client: Socket) {
+    client.broadcast.emit('undo');
+    client.emit('undo');
+  }
+  @SubscribeMessage('redo')
+  redo(@ConnectedSocket() client: Socket) {
+    client.broadcast.emit('redo');
+    client.emit('redo');
   }
 }
