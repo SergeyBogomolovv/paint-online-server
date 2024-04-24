@@ -21,7 +21,7 @@ export class DrawingGateway {
     @MessageBody() message: ConnectionEntity,
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(message.id);
+    client.join(message.title);
     client.broadcast.emit('connection', {
       message: `Пользователь ${message.name} подключился`,
     });
@@ -53,6 +53,6 @@ export class DrawingGateway {
   }
   @SubscribeMessage('save')
   save(@MessageBody() data: SaveDataEntity) {
-    this.drawingService.updateBoard(data.id, data.data);
+    this.drawingService.updateBoard(data.title, data.data);
   }
 }

@@ -1,4 +1,4 @@
 export class CreateBoardDto {
-  key: string;
+  title: string;
   data: string;
 }

@@ -1,5 +1,5 @@
 export class CreateBoardEntity {
   data: string;
-  id: string;
+  title: string;
   name: string;
 }
