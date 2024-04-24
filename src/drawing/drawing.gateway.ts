@@ -17,7 +17,7 @@ export class DrawingGateway {
   server: Server;
   constructor(private readonly drawingService: DrawingService) {}
   @SubscribeMessage('connection')
-  async connect(
+  connect(
     @MessageBody() message: ConnectionEntity,
     @ConnectedSocket() client: Socket,
   ) {
@@ -37,30 +37,22 @@ export class DrawingGateway {
     client.emit('finish');
   }
   @SubscribeMessage('save')
-  async save(
-    @MessageBody() data: SaveDataEntity,
-    @ConnectedSocket() client: Socket,
-  ) {
-    await this.drawingService.pushToUndo(data.id, data.data);
+  save(@MessageBody() data: SaveDataEntity, @ConnectedSocket() client: Socket) {
     client.broadcast.emit('save', data.data);
     client.emit('save', data.data);
   }
   @SubscribeMessage('undo')
-  async undo(
-    @ConnectedSocket() client: Socket,
-    @MessageBody('key') key: string,
-  ) {
+  undo(@ConnectedSocket() client: Socket) {
     client.broadcast.emit('undo');
     client.emit('undo');
-    await this.drawingService.undo(key);
   }
   @SubscribeMessage('redo')
-  async redo(
-    @ConnectedSocket() client: Socket,
-    @MessageBody('key') key: string,
-  ) {
+  redo(@ConnectedSocket() client: Socket) {
     client.broadcast.emit('redo');
     client.emit('redo');
-    await this.drawingService.redo(key);
+  }
+  @SubscribeMessage('set')
+  set(@MessageBody() data: SaveDataEntity) {
+    this.drawingService.updateBoard(data.id, data.data);
   }
 }

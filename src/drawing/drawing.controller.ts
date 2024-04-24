@@ -19,12 +19,4 @@ export class DrawingController {
   async saveData(@Body() data: SaveDataEntity) {
     await this.drawingService.updateBoard(data.id, data.data);
   }
-  @Put('undo')
-  async undo(@Body('key') key: string) {
-    await this.drawingService.undo(key);
-  }
-  @Put('redo')
-  async redo(@Body('key') key: string) {
-    await this.drawingService.redo(key);
-  }
 }

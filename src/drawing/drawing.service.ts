@@ -18,24 +18,6 @@ export class DrawingService {
       console.log('error');
     }
   }
-  async undo(key: string) {
-    const board = await this.prisma.board.findUnique({ where: { key } });
-    if (board.undoList.length > 0) {
-      const last = board.undoList.pop();
-      board.redoList = [...board.redoList, last];
-      board.data = last;
-      await this.prisma.board.update({ where: { key }, data: { ...board } });
-    }
-  }
-  async redo(key: string) {
-    const board = await this.prisma.board.findUnique({ where: { key } });
-    if (board.redoList.length > 0) {
-      const last = board.redoList.pop();
-      board.undoList = [...board.undoList, last];
-      board.data = last;
-      await this.prisma.board.update({ where: { key }, data: { ...board } });
-    }
-  }
   async findByKey(key: string) {
     return await this.prisma.board.findUnique({ where: { key } });
   }
@@ -43,12 +25,6 @@ export class DrawingService {
     await this.prisma.board.update({
       where: { key },
       data: { data },
-    });
-  }
-  async pushToUndo(key: string, data: string) {
-    await this.prisma.board.update({
-      where: { key },
-      data: { undoList: { push: data } },
     });
   }
 }
