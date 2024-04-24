@@ -17,6 +17,4 @@ model Board {
   id    String @id @default(cuid())
   key String @unique()
   data String 
-  undoList String[] @default([])
-  redoList String[] @default([])
 }

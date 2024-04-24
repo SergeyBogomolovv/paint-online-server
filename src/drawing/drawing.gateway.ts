@@ -36,10 +36,10 @@ export class DrawingGateway {
     client.broadcast.emit('finish');
     client.emit('finish');
   }
-  @SubscribeMessage('save')
-  save(@MessageBody() data: SaveDataEntity, @ConnectedSocket() client: Socket) {
-    client.broadcast.emit('save', data.data);
-    client.emit('save', data.data);
+  @SubscribeMessage('push')
+  push(@MessageBody() data: SaveDataEntity, @ConnectedSocket() client: Socket) {
+    client.broadcast.emit('push', data.data);
+    client.emit('push', data.data);
   }
   @SubscribeMessage('undo')
   undo(@ConnectedSocket() client: Socket) {
@@ -51,8 +51,8 @@ export class DrawingGateway {
     client.broadcast.emit('redo');
     client.emit('redo');
   }
-  @SubscribeMessage('set')
-  set(@MessageBody() data: SaveDataEntity) {
+  @SubscribeMessage('save')
+  save(@MessageBody() data: SaveDataEntity) {
     this.drawingService.updateBoard(data.id, data.data);
   }
 }
