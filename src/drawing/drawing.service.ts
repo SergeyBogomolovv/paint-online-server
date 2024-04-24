@@ -9,18 +9,18 @@ export class DrawingService {
     if (!board) {
       const newBoard = await this.prisma.board.create({
         data: {
-          data: '',
           title: title,
+          data: '',
         },
       });
       return newBoard;
     }
     return board;
   }
-  async updateBoard(title: string, data: string) {
+  async updateBoard(title: string, file: Express.Multer.File) {
     await this.prisma.board.update({
       where: { title },
-      data: { data },
+      data: { data: `data:image/png;base64,${file.buffer.toString('base64')}` },
     });
   }
 }
