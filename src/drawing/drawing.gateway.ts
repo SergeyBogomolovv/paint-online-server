@@ -8,21 +8,23 @@ import {
 import { DrawingService } from './drawing.service';
 import { Server, Socket } from 'socket.io';
 import { Drawing } from './entities/drawing.entity';
+import { ConnectionEntity } from './entities/connection.entity';
+import { SaveDataEntity } from './entities/save-data-entity';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class DrawingGateway {
   @WebSocketServer()
   server: Server;
   constructor(private readonly drawingService: DrawingService) {}
-
   @SubscribeMessage('connection')
-  connect(@MessageBody() message: any, @ConnectedSocket() client: Socket) {
+  async connect(
+    @MessageBody() message: ConnectionEntity,
+    @ConnectedSocket() client: Socket,
+  ) {
     client.join(message.id);
-    client.broadcast.emit(
-      'connection',
-      `Пользователь ${message.name} подключился`,
-    );
-    client.emit('connection', `Пользователь ${message.name} подключился`);
+    client.broadcast.emit('connection', {
+      message: `Пользователь ${message.name} подключился`,
+    });
   }
   @SubscribeMessage('draw')
   draw(@MessageBody() message: Drawing, @ConnectedSocket() client: Socket) {
@@ -35,10 +37,12 @@ export class DrawingGateway {
     client.emit('finish');
   }
   @SubscribeMessage('save')
-  save(@MessageBody('data') data: string, @ConnectedSocket() client: Socket) {
-    client.broadcast.emit('save', data);
-    client.emit('save', data);
+  save(@MessageBody() data: SaveDataEntity, @ConnectedSocket() client: Socket) {
+    this.drawingService.updateBoard(data.id, data.data);
+    client.broadcast.emit('save', data.data);
+    client.emit('save', data.data);
   }
+  //Доделать андо редо
   @SubscribeMessage('undo')
   undo(@ConnectedSocket() client: Socket) {
     client.broadcast.emit('undo');

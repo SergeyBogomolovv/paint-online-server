@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { CreateDrawingDto } from './dto/create-drawing.dto';
-import { UpdateDrawingDto } from './dto/update-drawing.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateBoardDto } from './dto/create-board.dto';
 
 @Injectable()
 export class DrawingService {
-  create(createDrawingDto: CreateDrawingDto) {
-    return 'This action adds a new drawing';
+  constructor(private readonly prisma: PrismaService) {}
+  async createBoard(dto: CreateBoardDto) {
+    try {
+      const board = await this.prisma.board.create({
+        data: {
+          data: dto.data,
+          redoList: dto.redoList,
+          undoList: dto.undoList,
+          key: dto.key,
+        },
+      });
+      return board;
+    } catch (error) {
+      console.log('erefsdf');
+    }
   }
-
-  findAll() {
-    return `This action returns all drawing`;
+  findByKey(key: string) {
+    return this.prisma.board.findUnique({ where: { key } });
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} drawing`;
+  setUndo(id: string, value: any) {
+    return this.prisma.board.update({
+      where: { key: id },
+      data: { undoList: value },
+    });
   }
-
-  update(id: number, updateDrawingDto: UpdateDrawingDto) {
-    return `This action updates a #${id} drawing`;
+  setRedo(id: string, value: any) {
+    return this.prisma.board.update({
+      where: { key: id },
+      data: { redoList: value },
+    });
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} drawing`;
+  async updateBoard(key: string, data: string) {
+    return await this.prisma.board.update({ where: { key }, data: { data } });
   }
 }
