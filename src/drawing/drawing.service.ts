@@ -10,32 +10,45 @@ export class DrawingService {
       const board = await this.prisma.board.create({
         data: {
           data: dto.data,
-          redoList: dto.redoList,
-          undoList: dto.undoList,
           key: dto.key,
         },
       });
       return board;
     } catch (error) {
-      console.log('erefsdf');
+      console.log('error');
     }
   }
-  findByKey(key: string) {
-    return this.prisma.board.findUnique({ where: { key } });
+  async undo(key: string) {
+    const board = await this.prisma.board.findUnique({ where: { key } });
+    if (board.undoList.length > 0) {
+      const last = board.undoList.pop();
+      board.redoList = [...board.redoList, last];
+      board.data = last;
+      await this.prisma.board.update({ where: { key }, data: { ...board } });
+    }
   }
-  setUndo(id: string, value: any) {
-    return this.prisma.board.update({
-      where: { key: id },
-      data: { undoList: value },
-    });
+  async redo(key: string) {
+    const board = await this.prisma.board.findUnique({ where: { key } });
+    if (board.redoList.length > 0) {
+      const last = board.redoList.pop();
+      board.undoList = [...board.undoList, last];
+      board.data = last;
+      await this.prisma.board.update({ where: { key }, data: { ...board } });
+    }
   }
-  setRedo(id: string, value: any) {
-    return this.prisma.board.update({
-      where: { key: id },
-      data: { redoList: value },
-    });
+  async findByKey(key: string) {
+    return await this.prisma.board.findUnique({ where: { key } });
   }
   async updateBoard(key: string, data: string) {
-    return await this.prisma.board.update({ where: { key }, data: { data } });
+    await this.prisma.board.update({
+      where: { key },
+      data: { data },
+    });
+  }
+  async pushToUndo(key: string, data: string) {
+    await this.prisma.board.update({
+      where: { key },
+      data: { undoList: { push: data } },
+    });
   }
 }

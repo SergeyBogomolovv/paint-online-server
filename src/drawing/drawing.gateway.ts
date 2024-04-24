@@ -37,20 +37,30 @@ export class DrawingGateway {
     client.emit('finish');
   }
   @SubscribeMessage('save')
-  save(@MessageBody() data: SaveDataEntity, @ConnectedSocket() client: Socket) {
-    this.drawingService.updateBoard(data.id, data.data);
+  async save(
+    @MessageBody() data: SaveDataEntity,
+    @ConnectedSocket() client: Socket,
+  ) {
+    await this.drawingService.pushToUndo(data.id, data.data);
     client.broadcast.emit('save', data.data);
     client.emit('save', data.data);
   }
-  //Доделать андо редо
   @SubscribeMessage('undo')
-  undo(@ConnectedSocket() client: Socket) {
+  async undo(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('key') key: string,
+  ) {
     client.broadcast.emit('undo');
     client.emit('undo');
+    await this.drawingService.undo(key);
   }
   @SubscribeMessage('redo')
-  redo(@ConnectedSocket() client: Socket) {
+  async redo(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('key') key: string,
+  ) {
     client.broadcast.emit('redo');
     client.emit('redo');
+    await this.drawingService.redo(key);
   }
 }
