@@ -1,30 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBoardDto } from './dto/create-board.dto';
 
 @Injectable()
 export class DrawingService {
   constructor(private readonly prisma: PrismaService) {}
-  async createBoard(dto: CreateBoardDto) {
-    try {
-      const board = await this.prisma.board.create({
+  async findByKey(title: string) {
+    const board = await this.prisma.board.findUnique({ where: { title } });
+    if (!board) {
+      const newBoard = await this.prisma.board.create({
         data: {
-          data: dto.data,
-          key: dto.key,
+          title: title,
+          data: '',
         },
       });
-      return board;
-    } catch (error) {
-      console.log('error');
+      return newBoard;
     }
+    return board;
   }
-  async findByKey(key: string) {
-    return await this.prisma.board.findUnique({ where: { key } });
-  }
-  async updateBoard(key: string, data: string) {
+  async updateBoard(title: string, file: Express.Multer.File) {
     await this.prisma.board.update({
-      where: { key },
-      data: { data },
+      where: { title },
+      data: { data: `data:image/png;base64,${file.buffer.toString('base64')}` },
     });
   }
 }

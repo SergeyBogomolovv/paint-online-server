@@ -1,4 +1,4 @@
 export class ConnectionEntity {
-  id: string;
+  title: string;
   name: string;
 }
